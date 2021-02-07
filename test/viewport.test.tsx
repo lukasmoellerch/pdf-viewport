@@ -4,9 +4,8 @@ import { PdfViewport } from "../src";
 
 describe("it", () => {
   it("renders without crashing", async () => {
-    const { container } = render(
+    render(
       <PdfViewport pdf={undefined} pageNumber={1} aspectRatio={1}></PdfViewport>
     );
-    const contentWrapper = container.querySelector("div > div > div");
   });
 });
