@@ -12,6 +12,7 @@ import {
   useContext,
 } from "react";
 import { getPage } from "../lib/promise-memo";
+import { ResizeObserver } from "@juggle/resize-observer";
 
 interface ViewportContextData {
   pdf: PDFDocumentProxy;
@@ -97,8 +98,11 @@ const PdfViewport: React.FC<Props> = ({
   const refElement = useRef<HTMLDivElement | null>(null);
   const observer = useMemo(
     () =>
-      new (window as any).ResizeObserver(() => {
-        setWidth(refElement.current?.getBoundingClientRect().width ?? 0);
+      new ResizeObserver(entries => {
+        for (let entry of entries) {
+          if (entry.target !== refElement.current) continue;
+          setWidth(entry.contentBoxSize[0].inlineSize);
+        }
       }),
     []
   );
