@@ -63,5 +63,11 @@
   },
   "dependencies": {
     "@juggle/resize-observer": "^3.2.0"
+  },
+  "release": {
+    "branches": [
+      "main",
+      "next"
+    ]
   }
 }
