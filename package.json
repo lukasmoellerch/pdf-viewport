@@ -17,7 +17,8 @@
     "lint": "tsdx lint",
     "prepare": "tsdx build",
     "size": "size-limit",
-    "analyze": "size-limit --why"
+    "analyze": "size-limit --why",
+    "build-example": "cd example && yarn && yarn build"
   },
   "peerDependencies": {
     "react": ">=16",
