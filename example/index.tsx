@@ -1,18 +1,23 @@
-import 'react-app-polyfill/ie11';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import examplePdf from 'url:./assets/pdfjs_example.pdf';
+import "react-app-polyfill/ie11";
+import * as React from "react";
+import * as ReactDOM from "react-dom";
+import examplePdf from "url:./assets/pdfjs_example.pdf";
 
-import { getDocument } from 'pdfjs-dist/es5/build/pdf';
-import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
-import * as pdfjsLib from 'pdfjs-dist/es5/build/pdf';
-import { tw } from 'twind';
+import { getDocument } from "pdfjs-dist/es5/build/pdf";
+import { PDFDocumentProxy } from "pdfjs-dist/types/display/api";
+import * as pdfjsLib from "pdfjs-dist/es5/build/pdf";
+import { tw } from "twind";
 
-import { PdfCanvasLayer, PdfSvgLayer, PdfTextLayer, PdfViewport } from '../src';
-import { portraitA4 } from '../src/components/viewport';
+import { PdfCanvasLayer, PdfSvgLayer, PdfTextLayer, PdfViewport } from "../";
+
+const portraitA4 = 0.772727273;
+
+if ((module as any).hot) {
+  (module as any).hot.accept();
+}
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.7.570/pdf.worker.min.js';
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.7.570/pdf.worker.min.js";
 
 const exampleA = `<PdfViewport
   aspectRatio={portraitA4}
@@ -74,13 +79,13 @@ const App = () => {
       <p
         className={tw`max-w-screen-lg text-lg sm:text-3xl sm:leading-10 font-medium mb-8 sm:mb-10 text-gray-700`}
       >
-        A library that makes using{' '}
+        A library that makes using{" "}
         <a
           href="https://mozilla.github.io/pdf.js/"
           className={tw`text-underline text-purple-600`}
         >
           pdfjs
-        </a>{' '}
+        </a>{" "}
         in react projects easy.
       </p>
       <ul className={tw`list-disc my-4`}>
@@ -140,46 +145,54 @@ const App = () => {
       </h3>
       <div className={tw`grid grid-cols-1 xl:grid-cols-2 gap-3`}>
         <div
-          className={tw`grid grid-cols-2 bg-purple-100 p-3 rounded-lg border-2 border-purple-200`}
+          className={tw`flex bg-purple-100 justify-between p-3 rounded-lg border-2 border-purple-200`}
         >
-          <div className={tw`flex flex-col`}>
+          <div className={tw`flex flex-col flex-grow`}>
             <div
               className={tw`text-center mr-auto bg-purple-500 rounded-lg py-2 px-5 text-purple-100 font-bold`}
             >
               SVG
             </div>
-            <div className={tw`flex flex-grow items-center text-purple-800`}>
-              <pre className={tw`mx-auto`}>{exampleA}</pre>
+            <div
+              className={tw`flex flex-grow items-center text-purple-800 my-5`}
+            >
+              <pre className={tw`mx-auto text-xs sm:text-sm md:text-lg`}>
+                {exampleA}
+              </pre>
             </div>
           </div>
           <PdfViewport
             aspectRatio={portraitA4}
             pdf={pdf}
             pageNumber={1}
-            className={pageStyle + ' ' + tw`bg-white`}
+            className={pageStyle + " " + tw`bg-white w-1/3 md:w-1/2`}
           >
             <PdfSvgLayer />
           </PdfViewport>
         </div>
         <div
-          className={tw`grid grid-cols-2 bg-green-100 p-3 rounded-lg border-2 border-green-200`}
+          className={tw`flex bg-green-100 justify-between p-3 rounded-lg border-2 border-green-200`}
         >
           <PdfViewport
             aspectRatio={portraitA4}
             pdf={pdf}
             pageNumber={1}
-            className={pageStyle + ' ' + tw`bg-green-100`}
+            className={pageStyle + " " + tw`bg-white w-1/3 md:w-1/2`}
           >
             <PdfCanvasLayer className={canvasStyle} />
           </PdfViewport>
-          <div className={tw`flex flex-col`}>
+          <div className={tw`flex flex-col flex-grow`}>
             <div
               className={tw`text-center ml-auto bg-green-500 rounded-lg py-2 px-5 text-green-100 font-bold`}
             >
               Canvas
             </div>
-            <div className={tw`flex flex-grow items-center text-green-800`}>
-              <pre className={tw`mx-auto`}>{exampleB}</pre>
+            <div
+              className={tw`flex flex-grow items-center text-green-800 my-5`}
+            >
+              <pre className={tw`mx-auto text-xs sm:text-sm md:text-lg`}>
+                {exampleB}
+              </pre>
             </div>
           </div>
         </div>
@@ -193,14 +206,14 @@ const App = () => {
           pageNumber={1}
           yStart={0.1}
           yEnd={0.3}
-          className={pageStyle + ' ' + tw`w-5/6`}
+          className={pageStyle + " " + tw`w-5/6 mx-auto xl:ml-0`}
         >
           <PdfSvgLayer />
         </PdfViewport>
         <pre>{exampleC}</pre>
       </div>
       <h3 className={tw`text-lg font-bold mt-6 mb-4`}>Text Layer</h3>
-      <div className={tw`grid grid-cols-1 xl:grid-cols-2 gap-3`}>
+      <div className={tw`grid grid-cols-1 xl:grid-cols-2 gap-8`}>
         <PdfViewport
           aspectRatio={portraitA4}
           pdf={pdf}
@@ -209,7 +222,7 @@ const App = () => {
           yEnd={0.3}
           xStart={0.1}
           xEnd={0.4}
-          className={pageStyle + ' ' + tw`w-5/6`}
+          className={pageStyle + " " + tw`w-5/6 mx-auto xl:ml-0`}
         >
           <PdfTextLayer />
           <PdfSvgLayer />
@@ -220,4 +233,4 @@ const App = () => {
   );
 };
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<App />, document.getElementById("root"));
