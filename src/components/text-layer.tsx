@@ -1,8 +1,8 @@
-import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { getPage } from '../lib/promise-memo';
-import { renderText } from '../lib/render-text';
-import { useViewport } from './viewport';
+import * as React from "react";
+import { useEffect, useRef, useState } from "react";
+import { getPage } from "../lib/promise-memo";
+import { renderText } from "../lib/render-text";
+import { useViewport } from "./viewport";
 
 const PdfTextLayer: React.FC<{}> = () => {
   const {
@@ -34,13 +34,13 @@ const PdfTextLayer: React.FC<{}> = () => {
     return () => {
       cancel = true;
     };
-  }, [pageNumber, pdf]);
+  }, [pageNumber, pdf, el]);
 
   return (
     <div
       ref={el}
       style={{
-        position: 'absolute',
+        position: "absolute",
         top: 0,
         left: 0,
         bottom: 0,
@@ -48,7 +48,7 @@ const PdfTextLayer: React.FC<{}> = () => {
         transform: `translateX(-${(xStart / (xEnd - xStart)) *
           100}%) translateY(-${(yStart / (yEnd - yStart)) *
           100}%) scale(${targetWidth / (xEnd - xStart) / width})`,
-        transformOrigin: '0 0',
+        transformOrigin: "0 0",
       }}
     />
   );

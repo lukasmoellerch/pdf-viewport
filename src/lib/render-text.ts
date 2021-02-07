@@ -1,8 +1,8 @@
-import { renderTextLayer } from 'pdfjs-dist/es5/build/pdf';
-import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
-import { ensureStylesheetRule } from './cssom';
-import { getCache } from './memo';
-import { getPage } from './promise-memo';
+import { renderTextLayer } from "pdfjs-dist/es5/build/pdf";
+import { PDFDocumentProxy } from "pdfjs-dist/types/display/api";
+import { ensureStylesheetRule } from "./cssom";
+import { getCache } from "./memo";
+import { getPage } from "./promise-memo";
 
 /*
  await (async () => {
@@ -82,27 +82,27 @@ export const renderText = async (pdf: PDFDocumentProxy, pageNumber: number) => {
     return cached.then(e => e.cloneNode(true) as HTMLDivElement);
   }
 
-  ensureStylesheetRule('renderText', '.text-container > span', [
-    ['position', 'absolute'],
-    ['color', 'transparent'],
-    ['display', 'inline'],
-    ['white-space', 'pre'],
-    ['cursor', 'text'],
-    ['transform-origin', '0% 0%'],
-    ['line-height', '1'],
+  ensureStylesheetRule("renderText", ".text-container > span", [
+    ["position", "absolute"],
+    ["color", "transparent"],
+    ["display", "inline"],
+    ["white-space", "pre"],
+    ["cursor", "text"],
+    ["transform-origin", "0% 0%"],
+    ["line-height", "1"],
   ]);
 
-  const container = document.createElement('div');
+  const container = document.createElement("div");
 
   const contentPromise = (async () => {
     const page = await getPage(pdf, pageNumber);
     const textContentStream = await getStream(pdf, pageNumber);
     const viewport = await page.getViewport({ scale: VIEWPORT_SCALE });
 
-    container.style.position = 'relative';
+    container.style.position = "relative";
     container.style.transform = `scale(${1 / VIEWPORT_SCALE})`;
-    container.style.transformOrigin = '0% 0%';
-    container.classList.add('text-container');
+    container.style.transformOrigin = "0% 0%";
+    container.classList.add("text-container");
 
     const textDivs: HTMLElement[] = [];
     const textContentItemsStr: string[] = [];

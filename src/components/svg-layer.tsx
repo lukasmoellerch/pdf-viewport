@@ -1,7 +1,7 @@
-import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { renderSVG } from '../lib/render-svg';
-import { useViewport } from './viewport';
+import * as React from "react";
+import { useEffect, useRef, useState } from "react";
+import { renderSVG } from "../lib/render-svg";
+import { useViewport } from "./viewport";
 
 /**
  * This component renders the pdf viewport using an svg element.
@@ -48,9 +48,9 @@ const PdfSvgLayer = () => {
       while (p.firstChild) p.removeChild(p.firstChild);
       p.appendChild(s);
 
-      setWidth(parseFloat(s.getAttribute('width') ?? ''));
+      setWidth(parseFloat(s.getAttribute("width") ?? ""));
     });
-  }, [pdf, pageNumber]);
+  }, [pdf, pageNumber, ref]);
 
   return (
     <div
@@ -58,7 +58,7 @@ const PdfSvgLayer = () => {
       style={{
         // The `PdfViewport` already handles the aspect ratio and it's also `position: "relative"` we
         // simply cover its area.
-        position: 'absolute',
+        position: "absolute",
         top: 0,
         left: 0,
         bottom: 0,
@@ -67,8 +67,8 @@ const PdfSvgLayer = () => {
         // The svg is only used for display purposes. We ignore all pointer events and also
         // ensure that the svg itself is not selectable. The text spans will not contain the string content
         // of the pdf, but junk.
-        pointerEvents: 'none',
-        userSelect: 'none',
+        pointerEvents: "none",
+        userSelect: "none",
 
         // Apply transforms so that the pdf is cropped correctly:
         // (xEnd - xStart) = 100 width in relative cropped display space
@@ -83,7 +83,7 @@ const PdfSvgLayer = () => {
 
         // We transform with a coordinate system that has its origin in the top right coordinates
         // this makes coordinate system transformations easier.
-        transformOrigin: '0 0',
+        transformOrigin: "0 0",
       }}
     />
   );

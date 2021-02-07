@@ -1,4 +1,4 @@
-export type Interval = [start: number, end: number];
+export type Interval = [number, number];
 export function merge(intervals: Interval[]) {
   if (intervals.length === 0) return [];
   intervals.sort(([a], [b]) => a - b);

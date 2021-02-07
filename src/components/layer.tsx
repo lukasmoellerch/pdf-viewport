@@ -1,7 +1,7 @@
-import * as React from 'react';
-import { useEffect, useState } from 'react';
-import { getPage } from '../lib/promise-memo';
-import { useViewport } from './viewport';
+import * as React from "react";
+import { useEffect, useState } from "react";
+import { getPage } from "../lib/promise-memo";
+import { useViewport } from "./viewport";
 
 const PdfLayer: React.FC = ({ children }) => {
   const {
@@ -30,7 +30,7 @@ const PdfLayer: React.FC = ({ children }) => {
   return (
     <div
       style={{
-        position: 'absolute',
+        position: "absolute",
         top: 0,
         left: 0,
         bottom: 0,
@@ -39,7 +39,7 @@ const PdfLayer: React.FC = ({ children }) => {
         transform: `translateX(-${(xStart / (xEnd - xStart)) *
           100}%) translateY(-${(yStart / (yEnd - yStart)) *
           100}%) scale(${targetWidth / (xEnd - xStart) / width})`,
-        transformOrigin: '0 0',
+        transformOrigin: "0 0",
       }}
     >
       <div

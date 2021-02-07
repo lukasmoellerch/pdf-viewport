@@ -29,12 +29,6 @@
       "pre-commit": "tsdx lint"
     }
   },
-  "prettier": {
-    "printWidth": 80,
-    "semi": true,
-    "singleQuote": true,
-    "trailingComma": "es5"
-  },
   "name": "pdf-viewport",
   "author": "lukasmoellerch",
   "module": "dist/pdf-viewport.esm.js",
@@ -60,5 +54,9 @@
     "tslib": "^2.1.0",
     "typescript": "^4.1.3",
     "pdfjs-dist": "^2.7.570"
+  },
+  "resolutions": {
+    "**/@typescript-eslint/eslint-plugin": "^4.1.1",
+    "**/@typescript-eslint/parser": "^4.1.1"
   }
 }

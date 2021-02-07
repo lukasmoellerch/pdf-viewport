@@ -31,5 +31,5 @@ export function genericMemo<D extends object, A extends unknown[], B, C>(
 export function memo<D extends object, A extends [number | string], B>(
   fn: (base: D, ...args: A) => B
 ) {
-  return genericMemo<D, A, B, A[0]>(fn, (a) => a);
+  return genericMemo<D, A, B, A[0]>(fn, a => a);
 }

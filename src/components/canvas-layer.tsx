@@ -1,8 +1,8 @@
-import * as React from 'react';
-import { useCallback } from 'react';
-import useDpr from '../hooks/useDpr';
-import { usePdf } from '../hooks/usePdf';
-import { useViewport } from './viewport';
+import * as React from "react";
+import { useCallback } from "react";
+import useDpr from "../hooks/useDpr";
+import { usePdf } from "../hooks/usePdf";
+import { useViewport } from "./viewport";
 
 /**
  * This component renders the pdf viewport on a canvas element, taking dpr into account
@@ -75,22 +75,22 @@ const PdfCanvasLayer: React.FC<{ className?: string }> = ({ className }) => {
         style={{
           // The `PdfViewport` already handles the aspect ratio and it's also `position: "relative"` we
           // simply cover its area.
-          position: 'absolute',
+          position: "absolute",
           top: 0,
           left: 0,
           bottom: 0,
           right: 0,
           // The canvas is only used for display purposes. We ignore all pointer events and also
           // ensure that the canvas itself is not selectable.
-          pointerEvents: 'none',
-          userSelect: 'none',
+          pointerEvents: "none",
+          userSelect: "none",
         }}
       >
         <div
           style={
             isPrimaryCanvas
               ? {
-                  position: 'absolute',
+                  position: "absolute",
 
                   // The viewport has a horizontal size of 100% = xEnd - xStart (in relative pdf coordinates)
                   // We have to move the canvas xStart to the left in relative pdf coordinates
@@ -107,7 +107,7 @@ const PdfCanvasLayer: React.FC<{ className?: string }> = ({ className }) => {
               : {
                   // If it's not a primary canvas we already know that it has the correct size and our viewport applied
                   // - we just have to position it in the top left corner.
-                  position: 'absolute',
+                  position: "absolute",
                   top: 0,
                   left: 0,
                 }

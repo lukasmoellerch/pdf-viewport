@@ -1,5 +1,5 @@
-import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
-import * as React from 'react';
+import { PDFDocumentProxy } from "pdfjs-dist/types/display/api";
+import * as React from "react";
 import {
   DetailedHTMLProps,
   HTMLAttributes,
@@ -10,8 +10,8 @@ import {
   createContext,
   useState,
   useContext,
-} from 'react';
-import { getPage } from '../lib/promise-memo';
+} from "react";
+import { getPage } from "../lib/promise-memo";
 
 interface ViewportContextData {
   pdf: PDFDocumentProxy;
@@ -31,14 +31,14 @@ const ViewportContext = createContext<ViewportContextData | undefined>(
 export const useViewport = () => {
   const data = useContext(ViewportContext);
   if (data === undefined)
-    throw new Error('useViewport called without a Viewport parent,');
+    throw new Error("useViewport called without a Viewport parent,");
   return data;
 };
 
 // width / height
 export const portraitA4 = 595 / 841;
 export const landscapeA4 = 1 / portraitA4;
-export const dynamic = Symbol('dynamic');
+export const dynamic = Symbol("dynamic");
 
 interface Props
   extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
@@ -102,13 +102,16 @@ const PdfViewport: React.FC<Props> = ({
       }),
     []
   );
-  const ref = useCallback((el: HTMLDivElement | null) => {
-    if (refElement.current !== null) observer.unobserve(refElement.current);
+  const ref = useCallback(
+    (el: HTMLDivElement | null) => {
+      if (refElement.current !== null) observer.unobserve(refElement.current);
 
-    if (el === null) return;
-    refElement.current = el;
-    observer.observe(el);
-  }, []);
+      if (el === null) return;
+      refElement.current = el;
+      observer.observe(el);
+    },
+    [observer]
+  );
 
   const viewportData = useMemo(
     () => ({
@@ -127,7 +130,7 @@ const PdfViewport: React.FC<Props> = ({
 
   if (realPageAspectRatio === undefined)
     throw new Error(
-      'either aspectRatio or approximateAspectRatio has to be set.'
+      "either aspectRatio or approximateAspectRatio has to be set."
     );
 
   const effectiveAspectRatio =
@@ -156,8 +159,8 @@ const PdfViewport: React.FC<Props> = ({
         ref={ref}
         style={{
           paddingTop: `${(1 / effectiveAspectRatio) * 100}%`,
-          position: 'relative',
-          overflow: 'hidden',
+          position: "relative",
+          overflow: "hidden",
         }}
       >
         <ViewportContext.Provider value={viewportData}>
