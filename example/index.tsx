@@ -4,11 +4,22 @@ import * as ReactDOM from "react-dom";
 import examplePdf from "url:./assets/pdfjs_example.pdf";
 
 import { getDocument } from "pdfjs-dist/es5/build/pdf";
-import { PDFDocumentProxy } from "pdfjs-dist/types/display/api";
+import { PDFDocumentProxy, PDFPageProxy } from "pdfjs-dist/types/display/api";
 import * as pdfjsLib from "pdfjs-dist/es5/build/pdf";
 import { tw } from "twind";
 
-import { PdfCanvasLayer, PdfSvgLayer, PdfTextLayer, PdfViewport } from "../";
+import {
+  PdfCanvasLayer,
+  PdfSvgLayer,
+  PdfTextLayer,
+  PdfViewport,
+  PdfCustomLayer,
+  useViewport,
+  getStream,
+  getPage,
+} from "../";
+import { useEffect } from "react";
+import { useState } from "react";
 
 const portraitA4 = 0.772727273;
 
@@ -57,8 +68,94 @@ const exampleD = `<PdfViewport
   <PdfSvgLayer />
 </PdfViewport>`;
 
+export type Interval = [number, number];
+export function merge(intervals: Interval[]) {
+  if (intervals.length === 0) return [];
+  intervals.sort(([a], [b]) => a - b);
+  const stack: Interval[] = [[...intervals[0]]];
+  for (let i = 1; i < intervals.length; i++) {
+    const c = intervals[i];
+    const t = stack[stack.length - 1];
+    if (t[1] < c[0]) {
+      stack.push([...c]);
+    } else if (t[1] < c[1]) {
+      t[1] = c[1];
+    }
+  }
+  return stack;
+}
+const useIntervals = (
+  pdf: PDFDocumentProxy,
+  pageNumber: number,
+  threshold: number
+) => {
+  const [intervals, setIntervals] = useState<Interval[]>([]);
+  useEffect(() => {
+    let cancel = false;
+    const stream = getStream(pdf, pageNumber);
+    (async () => {
+      const page = await getPage(pdf, pageNumber);
+      if (cancel) return;
+      const scale = 1;
+      const viewport = page.getViewport({ scale });
+      const intervals: [number, number][] = [];
+      const reader = (await stream).getReader();
+      if (cancel) return;
+      while (true) {
+        const a = await reader.read();
+        if (cancel) return;
+        if (a.done) break;
+        const { items } = a.value as {
+          items: {
+            dir: "ltr";
+            height: number;
+            width: number;
+            transform: [number, number, number, number, number, number];
+          }[];
+        };
+        for (let item of items) {
+          const [_x, y] = [item.transform[4], item.transform[5]];
+
+          const yStart =
+            viewport.height / scale - (y + item.height) - threshold / scale / 2;
+          const height = item.height + threshold / scale;
+
+          intervals.push([yStart, yStart + height]);
+        }
+      }
+      if (cancel) return;
+      setIntervals(merge(intervals));
+    })();
+    return () => void (cancel = true);
+  }, [pdf, pageNumber, threshold]);
+  return intervals;
+};
+
+const Custom = ({ threshold }: { threshold: number }) => {
+  const { pdf, pageNumber } = useViewport();
+  const intervals = useIntervals(pdf, pageNumber, threshold);
+  return (
+    <PdfCustomLayer>
+      {intervals.map(([start, end], i) => (
+        <div
+          key={i}
+          className={tw`hover:bg-opacity-40 bg-red-300 bg-opacity-10 border-t border-b border-red-500 border-opacity-25 cursor-pointer transition-colors duration-75`}
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: start,
+            height: end - start,
+          }}
+        ></div>
+      ))}
+    </PdfCustomLayer>
+  );
+};
+
 const App = () => {
-  const [pdf, setPdf] = React.useState<PDFDocumentProxy | undefined>();
+  const [pdf, setPdf] = useState<PDFDocumentProxy | undefined>();
+  const [threshold, setThreshold] = useState(10);
   React.useEffect(() => {
     getDocument(examplePdf).promise.then(setPdf);
   }, []);
@@ -223,6 +320,41 @@ const App = () => {
           <PdfSvgLayer />
         </PdfViewport>
         <pre>{exampleD}</pre>
+      </div>
+      <h3 className={tw`text-lg font-bold mt-6 mb-4`}>Custom Layer</h3>
+      <p className={tw`mb-3`}>
+        This example implements a custom layer that displays regions with text.
+        It utilizes the viewport context to get a reference to the underlying
+        pdfjs handle, retrieves the text stream and uses the custom layer api to
+        display these regions in the coordinate space of the pdf. This way
+        cropping is supported as well and the content is dynamically resized to
+        match the PDF. Overlapping text boxes are merged after they are enlarged
+        by a constant threshold which can be adjusted using the slider below.
+        Using this custom layer is as simple as using of the provided ones:
+        Simple add <code>{`<Custom threshold={threshold} />`}</code> to your
+        PdfViewport.
+      </p>
+      <div className={tw`md:w-5/6 lg:w-2/3 xl:w-1/2 mx-auto`}>
+        <PdfViewport
+          aspectRatio={portraitA4}
+          pdf={pdf}
+          pageNumber={1}
+          className={pageStyle}
+        >
+          <PdfSvgLayer />
+          <Custom threshold={threshold} />
+        </PdfViewport>
+        <div className={tw`flex py-5`}>
+          Threshold:{" "}
+          <input
+            type="range"
+            className={tw`flex-grow ml-5`}
+            value={threshold}
+            min={0}
+            max={50}
+            onChange={e => setThreshold(e.target.valueAsNumber)}
+          />
+        </div>
       </div>
     </div>
   );
