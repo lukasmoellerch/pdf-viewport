@@ -152,6 +152,7 @@ const Custom = ({ threshold }: { threshold: number }) => {
 
 const App = () => {
   const [pdf, setPdf] = useState<PDFDocumentProxy | undefined>();
+  const [page, setPage] = useState(1);
   const [threshold, setThreshold] = useState(10);
   React.useEffect(() => {
     getDocument(examplePdf).promise.then(setPdf);
@@ -335,23 +336,40 @@ const App = () => {
         <PdfViewport
           aspectRatio={portraitA4}
           pdf={pdf}
-          pageNumber={1}
+          pageNumber={page}
           className={pageStyle}
         >
           <PdfSvgLayer />
           <Custom threshold={threshold} />
         </PdfViewport>
-        <div className={tw`flex py-5`}>
-          Threshold:{" "}
-          <input
-            type="range"
-            className={tw`flex-grow ml-5`}
-            value={threshold}
-            min={0}
-            max={50}
-            onChange={e => setThreshold(e.target.valueAsNumber)}
-          />
-        </div>
+        <table className={tw`w-full mt-3 mb-8`}>
+          <tr>
+            <td className={tw`w-0`}>Threshold: </td>
+            <td className={tw`pl-4 pt-3 pb-2 w-full`}>
+              <input
+                type="range"
+                className={tw`w-full`}
+                value={threshold}
+                min={0}
+                max={50}
+                onChange={e => setThreshold(e.target.valueAsNumber)}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td className={tw`w-0`}>Page: </td>
+            <td className={tw`pl-4 pt-3 pb-2 w-full`}>
+              <input
+                type="range"
+                className={tw`w-full`}
+                value={page}
+                min={1}
+                max={pdf?.numPages}
+                onChange={e => setPage(e.target.valueAsNumber)}
+              />
+            </td>
+          </tr>
+        </table>
       </div>
     </div>
   );
