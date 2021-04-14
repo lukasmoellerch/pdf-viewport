@@ -1,25 +1,22 @@
-import "react-app-polyfill/ie11";
-import * as React from "react";
-import * as ReactDOM from "react-dom";
-import examplePdf from "url:./assets/pdfjs_example.pdf";
-
-import { getDocument } from "pdfjs-dist/es5/build/pdf";
-import { PDFDocumentProxy, PDFPageProxy } from "pdfjs-dist/types/display/api";
 import * as pdfjsLib from "pdfjs-dist/es5/build/pdf";
+import { getDocument } from "pdfjs-dist/es5/build/pdf";
+import { PDFDocumentProxy } from "pdfjs-dist/types/display/api";
+import * as React from "react";
+import { useEffect, useState } from "react";
+import "react-app-polyfill/ie11";
+import * as ReactDOM from "react-dom";
 import { tw } from "twind";
-
+import examplePdf from "url:./assets/pdfjs_example.pdf";
 import {
+  getPage,
+  getStream,
   PdfCanvasLayer,
+  PdfCustomLayer,
   PdfSvgLayer,
   PdfTextLayer,
   PdfViewport,
-  PdfCustomLayer,
   useViewport,
-  getStream,
-  getPage,
 } from "../";
-import { useEffect } from "react";
-import { useState } from "react";
 
 const portraitA4 = 0.772727273;
 
