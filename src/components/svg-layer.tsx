@@ -69,6 +69,12 @@ const PdfSvgLayer = () => {
         // of the pdf, but junk.
         pointerEvents: "none",
         userSelect: "none",
+        WebkitUserSelect: "none",
+        MozUserSelect: "none",
+        backfaceVisibility: "hidden",
+        WebkitBackfaceVisibility: "hidden",
+        MozBackfaceVisibility: "hidden",
+        willChange: "opacity",
 
         // Apply transforms so that the pdf is cropped correctly:
         // (xEnd - xStart) = 100 width in relative cropped display space

@@ -290,33 +290,37 @@ const App = () => {
 
       <h3 className={tw`text-lg font-bold mt-6 mb-4`}>Cropping</h3>
       <div className={tw`grid grid-cols-1 xl:grid-cols-2 gap-3`}>
-        <PdfViewport
-          aspectRatio={portraitA4}
-          pdf={pdf}
-          pageNumber={1}
-          yStart={0.1}
-          yEnd={0.3}
-          className={pageStyle + " " + tw`w-5/6 mx-auto xl:ml-0`}
-        >
-          <PdfSvgLayer />
-        </PdfViewport>
+        <div>
+          <PdfViewport
+            aspectRatio={portraitA4}
+            pdf={pdf}
+            pageNumber={1}
+            yStart={0.1}
+            yEnd={0.3}
+            className={pageStyle + " " + tw`w-5/6 mx-auto xl:ml-0`}
+          >
+            <PdfSvgLayer />
+          </PdfViewport>
+        </div>
         <pre>{exampleC}</pre>
       </div>
       <h3 className={tw`text-lg font-bold mt-6 mb-4`}>Text Layer</h3>
       <div className={tw`grid grid-cols-1 xl:grid-cols-2 gap-8`}>
-        <PdfViewport
-          aspectRatio={portraitA4}
-          pdf={pdf}
-          pageNumber={1}
-          yStart={0.1}
-          yEnd={0.3}
-          xStart={0.1}
-          xEnd={0.4}
-          className={pageStyle + " " + tw`w-5/6 mx-auto xl:ml-0`}
-        >
-          <PdfTextLayer />
-          <PdfSvgLayer />
-        </PdfViewport>
+        <div>
+          <PdfViewport
+            aspectRatio={portraitA4}
+            pdf={pdf}
+            pageNumber={1}
+            yStart={0.1}
+            yEnd={0.3}
+            xStart={0.1}
+            xEnd={0.4}
+            className={pageStyle + " " + tw`w-5/6 mx-auto xl:ml-0`}
+          >
+            <PdfTextLayer />
+            <PdfSvgLayer />
+          </PdfViewport>
+        </div>
         <pre>{exampleD}</pre>
       </div>
       <h3 className={tw`text-lg font-bold mt-6 mb-4`}>Custom Layer</h3>
