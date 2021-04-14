@@ -46,6 +46,7 @@ const PdfLayer: React.FC = ({ children }) => {
         style={{
           width: width,
           height: width / pageAspectRatio,
+          position: "relative",
         }}
       >
         {children}

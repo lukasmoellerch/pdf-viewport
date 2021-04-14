@@ -4,33 +4,6 @@ import { ensureStylesheetRule } from "./cssom";
 import { getCache } from "./memo";
 import { getPage } from "./promise-memo";
 
-/*
- await (async () => {
-        const reader = textContentStreamCopy.getReader();
-        while (true) {
-          const a = await reader.read();
-          if (a.done) break;
-          const { items } = a.value as {
-            items: {
-              dir: "ltr";
-              height: number;
-              width: number;
-              transform: [number, number, number, number, number, number];
-            }[];
-          };
-          for (let item of items) {
-            const [_x, y] = [item.transform[4], item.transform[5]];
-
-            const yStart =
-              viewport.height / scale - (y + item.height) - 20 / scale;
-            const height = item.height + 40 / scale;
-
-            intervals.push([yStart, yStart + height]);
-          }
-        }
-      })();
-*/
-
 const textMap = new WeakMap<
   PDFDocumentProxy,
   Map<number, Promise<HTMLDivElement>>
