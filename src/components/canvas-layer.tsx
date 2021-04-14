@@ -38,7 +38,7 @@ const PdfCanvasLayer: React.FC<{ className?: string }> = ({ className }) => {
     yEnd,
   } = useViewport();
 
-  const dpr = useDpr();
+  const dpr = useDpr(true);
   const [canvas, isPrimaryCanvas] = usePdf(
     pdf,
     pageNumber,
@@ -47,9 +47,13 @@ const PdfCanvasLayer: React.FC<{ className?: string }> = ({ className }) => {
     yStart,
     yEnd,
     // Our target width of the element itself is `targetWidth`, but the canvas resolution
-    // has to be scaled to the region that the viewport is region. E.g. if we render the left half
+    // has to be scaled to the region that the viewport is. E.g. if we render the left half
     // of a pdf page we have to make the primary canvas twice as big.
-    (targetWidth / (xEnd - xStart)) * dpr
+    // If we don't have the dpr yet (because either the first client-side render is taking place
+    // or the component is rendered on the server) we pass undefined to defer rendering until the
+    // useEffect call in useDpr sets the dpr. Rendering this component is pretty cheap so that
+    // shouldn't be an issue.
+    dpr !== undefined ? (targetWidth / (xEnd - xStart)) * dpr : undefined
   );
 
   /**

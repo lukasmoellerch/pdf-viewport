@@ -14,7 +14,7 @@ import { renderCanvasRegion } from "../lib/render-canvas";
  * @param yEnd the bottom boundary of the cropping region given relative to the height `yStart` < `yEnd` <= `1`
  * @param targetWidth The resolution the resulting canvas should have given as the number
  * of horizontal pixels that a full-size render of the the page given as `pageNumber` should
- * have.
+ * have. Rendering is deferred until `targetWidth` is set.
  * @returns A canvas element and a boolean that is true iff. the canvas is a primary canvas
  * -> see render-canvas for details for what a primary canvas is
  */
@@ -25,7 +25,7 @@ export function usePdf(
   xEnd: number,
   yStart: number,
   yEnd: number,
-  targetWidth: number
+  targetWidth: number | undefined
 ): [HTMLCanvasElement | null, boolean] {
   const [canvasElement, setCanvasElement] = useState<HTMLCanvasElement | null>(
     null
@@ -33,6 +33,7 @@ export function usePdf(
 
   const [isPrimaryCanvas, setIsPrimaryCanvas] = useState(false);
   useEffect(() => {
+    if (targetWidth === undefined) return;
     /** Whether the effect was already cancelled */
     let cancel = false;
 
