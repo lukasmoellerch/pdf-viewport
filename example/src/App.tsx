@@ -1,28 +1,19 @@
+import {
+  PdfCanvasLayer,
+  PdfSvgLayer,
+  PdfTextLayer,
+  PdfViewport,
+} from "pdf-viewport";
 import * as pdfjsLib from "pdfjs-dist/es5/build/pdf";
 import { getDocument } from "pdfjs-dist/es5/build/pdf";
 import { PDFDocumentProxy } from "pdfjs-dist/types/display/api";
 import * as React from "react";
-import { useEffect, useState } from "react";
-import "react-app-polyfill/ie11";
-import * as ReactDOM from "react-dom";
+import { useState } from "react";
 import { tw } from "twind";
-import examplePdf from "url:./assets/pdfjs_example.pdf";
-import {
-  getPage,
-  getStream,
-  PdfCanvasLayer,
-  PdfCustomLayer,
-  PdfSvgLayer,
-  PdfTextLayer,
-  PdfViewport,
-  useViewport,
-} from "../";
+import examplePdf from "../assets/pdfjs_example.pdf?url";
+import Custom from "./Custom";
 
 const portraitA4 = 0.772727273;
-
-if ((module as any).hot) {
-  (module as any).hot.accept();
-}
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.7.570/pdf.worker.min.js";
@@ -64,91 +55,6 @@ const exampleD = `<PdfViewport
   <PdfTextLayer />
   <PdfSvgLayer />
 </PdfViewport>`;
-
-export type Interval = [number, number];
-export function merge(intervals: Interval[]) {
-  if (intervals.length === 0) return [];
-  intervals.sort(([a], [b]) => a - b);
-  const stack: Interval[] = [[...intervals[0]]];
-  for (let i = 1; i < intervals.length; i++) {
-    const c = intervals[i];
-    const t = stack[stack.length - 1];
-    if (t[1] < c[0]) {
-      stack.push([...c]);
-    } else if (t[1] < c[1]) {
-      t[1] = c[1];
-    }
-  }
-  return stack;
-}
-const useIntervals = (
-  pdf: PDFDocumentProxy,
-  pageNumber: number,
-  threshold: number
-) => {
-  const [intervals, setIntervals] = useState<Interval[]>([]);
-  useEffect(() => {
-    let cancel = false;
-    const stream = getStream(pdf, pageNumber);
-    (async () => {
-      const page = await getPage(pdf, pageNumber);
-      if (cancel) return;
-      const scale = 1;
-      const viewport = page.getViewport({ scale });
-      const intervals: [number, number][] = [];
-      const reader = (await stream).getReader();
-      if (cancel) return;
-      while (true) {
-        const a = await reader.read();
-        if (cancel) return;
-        if (a.done) break;
-        const { items } = a.value as {
-          items: {
-            dir: "ltr";
-            height: number;
-            width: number;
-            transform: [number, number, number, number, number, number];
-          }[];
-        };
-        for (let item of items) {
-          const [_x, y] = [item.transform[4], item.transform[5]];
-
-          const yStart =
-            viewport.height / scale - (y + item.height) - threshold / scale / 2;
-          const height = item.height + threshold / scale;
-
-          intervals.push([yStart, yStart + height]);
-        }
-      }
-      if (cancel) return;
-      setIntervals(merge(intervals));
-    })();
-    return () => void (cancel = true);
-  }, [pdf, pageNumber, threshold]);
-  return intervals;
-};
-
-const Custom = ({ threshold }: { threshold: number }) => {
-  const { pdf, pageNumber } = useViewport();
-  const intervals = useIntervals(pdf, pageNumber, threshold);
-  return (
-    <PdfCustomLayer>
-      {intervals.map(([start, end], i) => (
-        <div
-          key={i}
-          className={tw`hover:bg-opacity-40 bg-red-300 bg-opacity-10 border-t border-b border-red-500 border-opacity-25 cursor-pointer transition-colors duration-75`}
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            top: start,
-            height: end - start,
-          }}
-        ></div>
-      ))}
-    </PdfCustomLayer>
-  );
-};
 
 const App = () => {
   const [pdf, setPdf] = useState<PDFDocumentProxy | undefined>();
@@ -343,40 +249,42 @@ const App = () => {
           pageNumber={page}
           className={pageStyle}
         >
-          <PdfSvgLayer />
+          <PdfCanvasLayer />
           <Custom threshold={threshold} />
         </PdfViewport>
         <table className={tw`w-full mt-3 mb-8`}>
-          <tr>
-            <td className={tw`w-0`}>Threshold: </td>
-            <td className={tw`pl-4 pt-3 pb-2 w-full`}>
-              <input
-                type="range"
-                className={tw`w-full`}
-                value={threshold}
-                min={0}
-                max={50}
-                onChange={e => setThreshold(e.target.valueAsNumber)}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td className={tw`w-0`}>Page: </td>
-            <td className={tw`pl-4 pt-3 pb-2 w-full`}>
-              <input
-                type="range"
-                className={tw`w-full`}
-                value={page}
-                min={1}
-                max={pdf?.numPages}
-                onChange={e => setPage(e.target.valueAsNumber)}
-              />
-            </td>
-          </tr>
+          <tbody>
+            <tr>
+              <td className={tw`w-0`}>Threshold: </td>
+              <td className={tw`pl-4 pt-3 pb-2 w-full`}>
+                <input
+                  type="range"
+                  className={tw`w-full`}
+                  value={threshold}
+                  min={0}
+                  max={50}
+                  onChange={e => setThreshold(e.target.valueAsNumber)}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td className={tw`w-0`}>Page: </td>
+              <td className={tw`pl-4 pt-3 pb-2 w-full`}>
+                <input
+                  type="range"
+                  className={tw`w-full`}
+                  value={page}
+                  min={1}
+                  max={pdf?.numPages}
+                  onChange={e => setPage(e.target.valueAsNumber)}
+                />
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </div>
   );
 };
 
-ReactDOM.render(<App />, document.getElementById("root"));
+export default App;

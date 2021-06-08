@@ -72,7 +72,6 @@ const PdfCanvasLayer: React.FC<{ className?: string }> = ({ className }) => {
     },
     [canvas]
   );
-
   if (canvas) {
     return (
       <div
