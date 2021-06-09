@@ -20,7 +20,8 @@
     "analyze": "size-limit --why",
     "build-example": "cd example && yarn && yarn build",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "chromatic": "npx chromatic --project-token=587d3ae4379f"
   },
   "peerDependencies": {
     "pdfjs-dist": ">=2.7",
@@ -55,6 +56,7 @@
     "@types/react": "17.0.1",
     "@types/react-dom": "17.0.1",
     "babel-loader": "^8.2.2",
+    "chromatic": "^5.9.0",
     "husky": "^4.3.8",
     "pdfjs-dist": "^2.7.570",
     "react": "17.0.1",
