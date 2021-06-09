@@ -1,9 +1,11 @@
 # .github/workflows/chromatic.yml
 
 # Other necessary configuration for the action
-
+name: CI
+on: [push]
 jobs:
   chromatic-deployment:
+    runs-on: ubuntu-latest
     steps:
         # Other steps
       
