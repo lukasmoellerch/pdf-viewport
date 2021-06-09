@@ -18,7 +18,9 @@
     "prepare": "tsdx build",
     "size": "size-limit",
     "analyze": "size-limit --why",
-    "build-example": "cd example && yarn && yarn build"
+    "build-example": "cd example && yarn && yarn build",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "peerDependencies": {
     "pdfjs-dist": ">=2.7",
@@ -43,10 +45,16 @@
     }
   ],
   "devDependencies": {
+    "@babel/core": "^7.14.3",
     "@size-limit/preset-small-lib": "^4.9.2",
+    "@storybook/addon-actions": "^6.2.9",
+    "@storybook/addon-essentials": "^6.2.9",
+    "@storybook/addon-links": "^6.2.9",
+    "@storybook/react": "^6.2.9",
     "@testing-library/react": "^11.2.5",
     "@types/react": "17.0.1",
     "@types/react-dom": "17.0.1",
+    "babel-loader": "^8.2.2",
     "husky": "^4.3.8",
     "pdfjs-dist": "^2.7.570",
     "react": "17.0.1",
@@ -61,8 +69,8 @@
     "**/@typescript-eslint/parser": "^4.1.1"
   },
   "dependencies": {
-    "tslib": "^2.2.0",
-    "@juggle/resize-observer": "^3.2.0"
+    "@juggle/resize-observer": "^3.2.0",
+    "tslib": "^2.2.0"
   },
   "release": {
     "branches": [
