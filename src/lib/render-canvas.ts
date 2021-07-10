@@ -186,7 +186,7 @@ export async function renderCanvasRegion(
   if (mainCanvasSet) {
     for (const existingMainCanvas of mainCanvasSet) {
       if (
-        // We allow slightly main canvas with a slightly smaller size. This
+        // We allow main canvases with a slightly smaller size. This
         // might not be the best way to do it
         existingMainCanvas.scale * 1.2 >= scale &&
         // It might be possible that there is a main canvas that is suitable
