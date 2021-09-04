@@ -223,8 +223,8 @@ const App = () => {
             xEnd={0.4}
             className={pageStyle + " " + tw`w-5/6 mx-auto xl:ml-0`}
           >
-            <PdfTextLayer />
             <PdfSvgLayer />
+            <PdfTextLayer />
           </PdfViewport>
         </div>
         <pre>{exampleD}</pre>
