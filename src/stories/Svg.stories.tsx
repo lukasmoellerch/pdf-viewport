@@ -3,7 +3,7 @@ import * as pdfjsLib from "pdfjs-dist/es5/build/pdf";
 import { getDocument } from "pdfjs-dist/es5/build/pdf";
 import { PDFDocumentProxy } from "pdfjs-dist/types/display/api";
 import React, { useEffect, useState } from "react";
-import { PdfViewport, PdfSvgLayer } from "..";
+import { PdfViewport, PdfSvgLayer, darkModeSvgMiddleware } from "..";
 import examplePdf from "./assets/pdfjs_example.pdf";
 
 export default {
@@ -37,7 +37,7 @@ const Template: Story<{ maxWidth: number; darkMode?: boolean }> = ({
       pageNumber={3}
       style={{ maxWidth, margin: "auto", border: "1px solid black" }}
     >
-      <PdfSvgLayer darkMode={darkMode} />
+      <PdfSvgLayer middleware={darkMode ? darkModeSvgMiddleware : undefined} />
     </PdfViewport>
   );
 };
