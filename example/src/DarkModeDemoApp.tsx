@@ -175,9 +175,9 @@ const App = () => {
       </div>
       {documentProxy !== undefined && (
         <div
-          className={tw`px-5 py-32`}
+          className={tw`px-5 py-32 bg-gray-900`}
           style={{
-            backgroundColor: "hsl(0,0%,12%)",
+            backgroundColor: "hsl(0,0%,9%)",
           }}
         >
           <div
@@ -186,7 +186,7 @@ const App = () => {
               maxWidth,
               display: "flex",
             }}
-            className={tw`rounded shadow-lg ring-1 ring-gray-400 relative`}
+            className={tw`rounded-md shadow-lg ring-1 ring-gray-400 relative z-10 overflow-hidden`}
           >
             <PdfViewport
               pdf={documentProxy}
@@ -251,7 +251,7 @@ const App = () => {
                     key={index}
                     disabled={index + 1 === pageNumber}
                     onClick={() => setPageNumber(index + 1)}
-                    className={tw`p-2 rounded bg-blue-900 hover:bg-blue-700 disabled:bg-blue-600 disabled:ring-4 ring-blue-500 cursor:pointer text-white text-lg font-extrabold flex items-center justify-center`}
+                    className={tw`p-2 rounded bg-blue-900 hover:bg-blue-700 disabled:bg-blue-600 disabled:ring-4 ring-blue-500 cursor-pointer text-white text-lg font-extrabold flex items-center justify-center`}
                   >
                     {index + 1}
                   </button>
