@@ -77,13 +77,13 @@ export const renderText = async (pdf: PDFDocumentProxy, pageNumber: number) => {
     container.style.transformOrigin = "0% 0%";
     container.classList.add("text-container");
 
-    const textDivs: HTMLElement[] = [];
+    const textDivElements: HTMLElement[] = [];
     const textContentItemsStr: string[] = [];
     const tl = renderTextLayer({
       textContentStream,
       container,
       viewport,
-      textDivs,
+      textDivs: textDivElements,
       enhanceTextSelection: true,
       textContentItemsStr,
     });

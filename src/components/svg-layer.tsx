@@ -1,10 +1,11 @@
 import * as React from "react";
 import { useEffect, useRef } from "react";
 import { renderSVG } from "../lib/render-svg";
+import { SvgMiddleware } from "../lib/utils";
 import { useViewport } from "./viewport";
 
 interface Props {
-  darkMode?: boolean;
+  middleware?: SvgMiddleware;
 }
 
 /**
@@ -24,7 +25,7 @@ interface Props {
  * ```
  *
  */
-const PdfSvgLayer: React.FC<Props> = ({ darkMode }) => {
+const PdfSvgLayer: React.FC<Props> = ({ middleware }) => {
   // Extract the data from `PdfViewport`.
   const {
     pdf,
@@ -44,7 +45,7 @@ const PdfSvgLayer: React.FC<Props> = ({ darkMode }) => {
   useEffect(() => {
     let cancel = false;
     (async () => {
-      const s = await renderSVG(pdf, pageNumber, darkMode);
+      const s = await renderSVG(pdf, pageNumber, middleware);
       if (cancel) return;
 
       const p = ref.current;
@@ -58,7 +59,7 @@ const PdfSvgLayer: React.FC<Props> = ({ darkMode }) => {
     return () => {
       cancel = true;
     };
-  }, [pdf, pageNumber, ref, darkMode]);
+  }, [pdf, pageNumber, ref, middleware]);
 
   return (
     <div

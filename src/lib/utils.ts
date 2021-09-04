@@ -13,3 +13,8 @@ export function getOrDefault<K, V>(
   map.set(key, defaultValue);
   return defaultValue;
 }
+
+export type CanvasMiddleware = (
+  ctx: CanvasRenderingContext2D
+) => CanvasRenderingContext2D;
+export type SvgMiddleware = (element: SVGElement) => void;

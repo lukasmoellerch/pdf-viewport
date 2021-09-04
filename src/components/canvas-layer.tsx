@@ -2,11 +2,12 @@ import * as React from "react";
 import { useCallback } from "react";
 import useDpr from "../hooks/useDpr";
 import { usePdf } from "../hooks/usePdf";
+import { CanvasMiddleware } from "../lib/utils";
 import { useViewport } from "./viewport";
 
 interface Props {
   className?: string;
-  darkMode?: boolean;
+  middleware?: CanvasMiddleware;
 }
 
 /**
@@ -30,7 +31,7 @@ interface Props {
  * ```
  *
  */
-const PdfCanvasLayer: React.FC<Props> = ({ className, darkMode = false }) => {
+const PdfCanvasLayer: React.FC<Props> = ({ className, middleware }) => {
   // Extract the data from `PdfViewport`.
   const {
     pdf,
@@ -59,7 +60,7 @@ const PdfCanvasLayer: React.FC<Props> = ({ className, darkMode = false }) => {
     // useEffect call in useDpr sets the dpr. Rendering this component is pretty cheap so that
     // shouldn't be an issue.
     dpr !== undefined ? (targetWidth / (xEnd - xStart)) * dpr : undefined,
-    darkMode
+    middleware
   );
 
   /**

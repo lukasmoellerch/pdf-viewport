@@ -1,44 +1,16 @@
 import { PDFDocumentProxy } from "pdfjs-dist/types/display/api";
 import { globalFactory } from "./canvas-factory";
 import { CanvasObject } from "./canvas-object";
-import { darkModeTransform } from "./dark-mode";
-import { getCache } from "./memo";
+import { getCache2 } from "./memo";
 import { getPage } from "./promise-memo";
-import { ProxyContext } from "./proxy-context";
 import {
   PdfCanvasReference,
   PdfCanvasReferenceManager,
 } from "./reference-counting";
+import { CanvasMiddleware } from "./utils";
 
-class DarkModeProxyContext extends ProxyContext {
-  private realFillStyle: string | CanvasGradient | CanvasPattern = "#000000";
-  set fillStyle(color: string | CanvasGradient | CanvasPattern) {
-    this.realFillStyle = color;
-    if (typeof color !== "string") {
-      this.ctx.fillStyle = color;
-      return;
-    }
-    this.ctx.fillStyle = color;
-    this.ctx.fillStyle = darkModeTransform(this.ctx.fillStyle);
-  }
-  get fillStyle(): string | CanvasGradient | CanvasPattern {
-    return this.realFillStyle;
-  }
+export const idCanvasMiddleware: CanvasMiddleware = x => x;
 
-  private realStrokeStyle: string | CanvasGradient | CanvasPattern = "#000000";
-  set strokeStyle(color: string | CanvasGradient | CanvasPattern) {
-    this.realStrokeStyle = color;
-    if (typeof color !== "string") {
-      this.ctx.strokeStyle = color;
-      return;
-    }
-    this.ctx.strokeStyle = color;
-    this.ctx.strokeStyle = darkModeTransform(this.ctx.strokeStyle);
-  }
-  get strokeStyle(): string | CanvasGradient | CanvasPattern {
-    return this.realStrokeStyle;
-  }
-}
 interface MainCanvasPageLoadedData {
   width: number;
   height: number;
@@ -65,11 +37,7 @@ interface MainCanvas {
  */
 const lightModeMainCanvasMap: WeakMap<
   PDFDocumentProxy,
-  Map<number, Set<MainCanvas>>
-> = new WeakMap();
-const darkModeMainCanvasMap: WeakMap<
-  PDFDocumentProxy,
-  Map<number, Set<MainCanvas>>
+  WeakMap<CanvasMiddleware, Map<number, Set<MainCanvas>>>
 > = new WeakMap();
 
 /**
@@ -92,7 +60,7 @@ function renderCanvas(
   canvasObject: CanvasObject,
   pageNumber: number,
   scale: number,
-  darkMode: boolean
+  middleware: CanvasMiddleware
 ): [Promise<void>, Promise<void>] {
   const renderingReference = referenceManager.createRetainedRef();
   const pagePromise = getPage(pdf, pageNumber);
@@ -105,12 +73,10 @@ function renderCanvas(
     canvasObject.canvas.style.width = "100%";
     canvasObject.canvas.style.height = "100%";
     await new Promise(resolve => window.requestAnimationFrame(resolve));
-    if (darkMode) {
-      const proxyContext = new DarkModeProxyContext(canvasObject.context);
-      proxyContext.fillStyle = "rgb(0,0,0)";
-      proxyContext.strokeStyle = "rgb(0,0,0)";
+    if (middleware !== idCanvasMiddleware) {
+      const context = middleware(canvasObject.context);
       await page.render({
-        canvasContext: proxyContext,
+        canvasContext: context,
         viewport,
         canvasFactory: globalFactory,
       }).promise;
@@ -136,12 +102,9 @@ function createMainCanvas(
   pdf: PDFDocumentProxy,
   pageNumber: number,
   scale: number,
-  darkMode: boolean
+  middleware: CanvasMiddleware
 ): MainCanvas {
-  const cache = getCache(
-    darkMode ? darkModeMainCanvasMap : lightModeMainCanvasMap,
-    pdf
-  );
+  const cache = getCache2(lightModeMainCanvasMap, pdf, middleware);
   const canvasObject = globalFactory.create(undefined, undefined);
   const referenceManager = new PdfCanvasReferenceManager(0);
   const initialRef = referenceManager.createRetainedRef();
@@ -151,7 +114,7 @@ function createMainCanvas(
     canvasObject,
     pageNumber,
     scale,
-    darkMode
+    middleware
   );
   const mainCanvas: MainCanvas = {
     scale,
@@ -174,16 +137,12 @@ function createMainCanvas(
   if (existingSet) {
     existingSet.add(mainCanvas);
   } else {
-    const cache = getCache(
-      darkMode ? darkModeMainCanvasMap : lightModeMainCanvasMap,
-      pdf
-    );
+    const cache = getCache2(lightModeMainCanvasMap, pdf, middleware);
     cache.set(pageNumber, newSet);
   }
   // Remove it if we no longer need it
   let timeout: number | undefined;
   initialRef.addListener(() => {
-    console.log(`Ref released: ${darkMode}`);
     mainCanvas.currentMainRef = undefined;
   });
   referenceManager.addListener((cnt: number) => {
@@ -229,12 +188,9 @@ export async function renderCanvasRegion(
   xEnd: number,
   yStart: number,
   yEnd: number,
-  darkMode: boolean
+  middleware: CanvasMiddleware = idCanvasMiddleware
 ): Promise<[HTMLCanvasElement, boolean, PdfCanvasReference]> {
-  const cache = getCache(
-    darkMode ? darkModeMainCanvasMap : lightModeMainCanvasMap,
-    pdf
-  );
+  const cache = getCache2(lightModeMainCanvasMap, pdf, middleware);
 
   const mainCanvasSet = cache.get(pageNumber);
   let mainCanvas: MainCanvas | undefined;
@@ -261,7 +217,7 @@ export async function renderCanvasRegion(
 
   // It looks like we have to render from scratch
   if (mainCanvas === undefined) {
-    mainCanvas = createMainCanvas(pdf, pageNumber, scale, darkMode);
+    mainCanvas = createMainCanvas(pdf, pageNumber, scale, middleware);
     isMainUser = true;
   }
   // This isn't possible but it's hard to tell typescript that it is not

@@ -5,9 +5,10 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import { css, tw } from "twind/css";
 import {
+  darkModeCanvasMiddleware,
+  darkModeSvgMiddleware,
   PdfCanvasLayer,
   PdfSvgLayer,
-  PdfTextLayer,
   PdfViewport,
   portraitA4,
 } from "../../src";
@@ -207,7 +208,11 @@ const App = () => {
                 approximateAspectRatio={portraitA4}
                 className={tw`absolute inset-0`}
               >
-                {svg ? <PdfSvgLayer darkMode /> : <PdfCanvasLayer darkMode />}
+                {svg ? (
+                  <PdfSvgLayer middleware={darkModeSvgMiddleware} />
+                ) : (
+                  <PdfCanvasLayer middleware={darkModeCanvasMiddleware} />
+                )}
               </PdfViewport>
             </div>
             <div

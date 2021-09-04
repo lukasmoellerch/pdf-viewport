@@ -11,3 +11,6 @@ export {
 export { getStream } from "./lib/render-text";
 export { ProxyContext } from "./lib/proxy-context";
 export { getPage } from "./lib/promise-memo";
+
+export { darkModeCanvasMiddleware } from "./lib/canvas-dark-mode";
+export { darkModeSvgMiddleware } from "./lib/svg-dark-mode";

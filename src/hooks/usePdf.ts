@@ -1,8 +1,9 @@
 import { PDFDocumentProxy } from "pdfjs-dist/types/display/api";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getPage } from "../lib/promise-memo";
 import { PdfCanvasReference } from "../lib/reference-counting";
 import { renderCanvasRegion } from "../lib/render-canvas";
+import { CanvasMiddleware } from "../lib/utils";
 
 /**
  * A hook that wraps `renderCanvasRegion` iin a react hook
@@ -26,7 +27,7 @@ export function usePdf(
   yStart: number,
   yEnd: number,
   targetWidth: number | undefined,
-  darkMode: boolean
+  middleware: CanvasMiddleware | undefined
 ): [HTMLCanvasElement | null, boolean] {
   const [canvasElement, setCanvasElement] = useState<HTMLCanvasElement | null>(
     null
@@ -66,7 +67,7 @@ export function usePdf(
         xEnd,
         yStart,
         yEnd,
-        darkMode
+        middleware
       );
       const [canvas, isMain, ref] = await currentPromise;
 
@@ -84,6 +85,6 @@ export function usePdf(
         currentPromise.then(([, , newRef]) => newRef.release());
       }
     };
-  }, [pdf, pageNumber, targetWidth, xStart, xEnd, yStart, yEnd, darkMode]);
+  }, [pdf, pageNumber, targetWidth, xStart, xEnd, yStart, yEnd, middleware]);
   return [canvasElement, isPrimaryCanvas];
 }
