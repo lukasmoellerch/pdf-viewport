@@ -1,3 +1,7 @@
+/**
+ * A ProxyContext proxies all methods to the underlying context. It is intended as a
+ * superclass for middleware that need to intercept calls to the canvas rendering context.
+ */
 export class ProxyContext implements CanvasRenderingContext2D {
   ctx: CanvasRenderingContext2D;
 

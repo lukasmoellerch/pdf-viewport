@@ -7,13 +7,15 @@ const svgMap = new WeakMap<
   Map<number, Promise<SVGElement>>
 >();
 
+// This middleware does nothing
 const idSvgMiddleware: SvgMiddleware = _x => {};
 
 /**
  * Renders the page `pageNumber` to an SVGElement. The returned instance will
  * be unique and the caller is free to mount it anywhere in the tree.
- * @param pdf
- * @param pageNumber
+ * @param pdf The pdf which should be rendered
+ * @param pageNumber The number of the page which should be rendered (starting with 1)
+ * @param middleware An optional middleware which can be used to modify the SVG
  */
 export const renderSVG = async (
   pdf: PDFDocumentProxy,

@@ -1,5 +1,13 @@
 import { rgbToHsl } from "./color-utils";
 
+/**
+ * Map maps `x` from the range `[inMin, inMax]` to the range `[outMin, outMax]`.
+ * @param x The value to map.
+ * @param inMin The minimum value of the input range.
+ * @param inMax The maximum value of the input range.
+ * @param outMin The minimum value of the output range.
+ * @param outMax The maximum value of the output range.
+ */
 const map = (
   x: number,
   inMin: number,
@@ -8,6 +16,10 @@ const map = (
   outMax: number
 ) => ((x - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
 
+/**
+ * Converts `color` to its dark-mode variant.
+ * @param color Color to convert to dark mode
+ */
 export const darkModeTransform = (color: string) => {
   // parse the color, which is either given in hex notation #ffeeff or in rgb notation rgb(255, 255, 255)
   const hex = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);

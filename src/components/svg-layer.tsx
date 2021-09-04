@@ -5,6 +5,9 @@ import { SvgMiddleware } from "../lib/utils";
 import { useViewport } from "./viewport";
 
 interface Props {
+  /**
+   * The middleware to use for rendering.
+   */
   middleware?: SvgMiddleware;
 }
 

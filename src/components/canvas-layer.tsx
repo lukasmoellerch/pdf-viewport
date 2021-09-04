@@ -7,6 +7,9 @@ import { useViewport } from "./viewport";
 
 interface Props {
   className?: string;
+  /**
+   * The middleware to use for rendering
+   */
   middleware?: CanvasMiddleware;
 }
 

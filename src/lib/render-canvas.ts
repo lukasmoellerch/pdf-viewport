@@ -9,6 +9,7 @@ import {
 } from "./reference-counting";
 import { CanvasMiddleware } from "./utils";
 
+// This middleware does nothing
 export const idCanvasMiddleware: CanvasMiddleware = x => x;
 
 interface MainCanvasPageLoadedData {
@@ -35,7 +36,7 @@ interface MainCanvas {
  * Each `Set` once set shouldn't change anymore as it saves us from having to lookup
  * again. You therefore need to clear each set if you want to remove all references.
  */
-const lightModeMainCanvasMap: WeakMap<
+const mainCanvasMap: WeakMap<
   PDFDocumentProxy,
   WeakMap<CanvasMiddleware, Map<number, Set<MainCanvas>>>
 > = new WeakMap();
@@ -46,10 +47,12 @@ const lightModeMainCanvasMap: WeakMap<
  * until rendering is finished. It expects that `canvasObject` is not
  * reused until the reference is released. The method also sets the
  * `width` and `height` of the `canvasObject`.
- * @param referenceManager
- * @param canvasObject
- * @param pageNumber
- * @param scale
+ * @param referenceManager The reference manager which manages references
+ *                         to the main canvas object the result is used for
+ * @param canvasObject The canvas object to render to
+ * @param pageNumber The page number to render (starting with 1)
+ * @param scale The scale to render the page at
+ * @param middleware A middleware to apply while rendering
  * @returns two promises:
  * [0]: when the page is loaded,
  * [1]: when the page is rendered
@@ -95,8 +98,10 @@ function renderCanvas(
 /**
  * Creates a new mainCanvas for `pageNumber` and renders the page to it.
  * The `MainCanvas` object contains all the necessary data.
- * @param pageNumber
- * @param scale
+ * @param pdf The pdf to render
+ * @param pageNumber The page number to render (starting with 1)
+ * @param scale The scale to render the page at
+ * @param middleware A middleware to apply while rendering
  */
 function createMainCanvas(
   pdf: PDFDocumentProxy,
@@ -104,7 +109,7 @@ function createMainCanvas(
   scale: number,
   middleware: CanvasMiddleware
 ): MainCanvas {
-  const cache = getCache2(lightModeMainCanvasMap, pdf, middleware);
+  const cache = getCache2(mainCanvasMap, pdf, middleware);
   const canvasObject = globalFactory.create(undefined, undefined);
   const referenceManager = new PdfCanvasReferenceManager(0);
   const initialRef = referenceManager.createRetainedRef();
@@ -137,7 +142,7 @@ function createMainCanvas(
   if (existingSet) {
     existingSet.add(mainCanvas);
   } else {
-    const cache = getCache2(lightModeMainCanvasMap, pdf, middleware);
+    const cache = getCache2(mainCanvasMap, pdf, middleware);
     cache.set(pageNumber, newSet);
   }
   // Remove it if we no longer need it
@@ -171,10 +176,14 @@ function createMainCanvas(
  * the size of the the canvas that the promise resolves to. It's aspect ratio will
  * match the aspect ration of the pdf page if the canvas is a main canvas. Otherwise
  * the aspect ratio will match the aspect ratio of the section.
- * @param pageNumber
+ * @param pdf The pdf to render
+ * @param pageNumber The page number to render (starting with 1)
  * @param scale Minimum scale
- * @param start Relative y-start on page
- * @param end Relative y-end on page
+ * @param xStart Relative x-start on page
+ * @param xEnd Relative x-end on page
+ * @param yStart Relative y-start on page
+ * @param yEnd Relative y-end on page
+ * @param middleware A middleware to apply while rendering
  * @returns A promise resolving to an array:
  * [0]: The canvas,
  * [1]: Wether the canvas is a main canvas,
@@ -190,7 +199,7 @@ export async function renderCanvasRegion(
   yEnd: number,
   middleware: CanvasMiddleware = idCanvasMiddleware
 ): Promise<[HTMLCanvasElement, boolean, PdfCanvasReference]> {
-  const cache = getCache2(lightModeMainCanvasMap, pdf, middleware);
+  const cache = getCache2(mainCanvasMap, pdf, middleware);
 
   const mainCanvasSet = cache.get(pageNumber);
   let mainCanvas: MainCanvas | undefined;

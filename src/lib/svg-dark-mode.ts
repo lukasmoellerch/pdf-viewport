@@ -19,6 +19,12 @@ const applyColorTransform = (
   }
 };
 
+/**
+ * `darkModeSvgMiddleware` is a simple `SvgMiddleware` which inverts the stroke color and the
+ * fill color of paths and text. It can be used in places where a `middleware` can be provided.
+ *
+ * @param element The element which should be transformed into its dark-mode variant
+ */
 export const darkModeSvgMiddleware: SvgMiddleware = element => {
   applyColorTransform(element, darkModeTransform);
 };
