@@ -1,13 +1,44 @@
 import { PDFDocumentProxy } from "pdfjs-dist/types/display/api";
 import { globalFactory } from "./canvas-factory";
 import { CanvasObject } from "./canvas-object";
+import { darkModeTransform } from "./dark-mode";
 import { getCache } from "./memo";
 import { getPage } from "./promise-memo";
+import { ProxyContext } from "./proxy-context";
 import {
   PdfCanvasReference,
   PdfCanvasReferenceManager,
 } from "./reference-counting";
 
+class DarkModeProxyContext extends ProxyContext {
+  private realFillStyle: string | CanvasGradient | CanvasPattern = "#000000";
+  set fillStyle(color: string | CanvasGradient | CanvasPattern) {
+    this.realFillStyle = color;
+    if (typeof color !== "string") {
+      this.ctx.fillStyle = color;
+      return;
+    }
+    this.ctx.fillStyle = color;
+    this.ctx.fillStyle = darkModeTransform(this.ctx.fillStyle);
+  }
+  get fillStyle(): string | CanvasGradient | CanvasPattern {
+    return this.realFillStyle;
+  }
+
+  private realStrokeStyle: string | CanvasGradient | CanvasPattern = "#000000";
+  set strokeStyle(color: string | CanvasGradient | CanvasPattern) {
+    this.realStrokeStyle = color;
+    if (typeof color !== "string") {
+      this.ctx.strokeStyle = color;
+      return;
+    }
+    this.ctx.strokeStyle = color;
+    this.ctx.strokeStyle = darkModeTransform(this.ctx.strokeStyle);
+  }
+  get strokeStyle(): string | CanvasGradient | CanvasPattern {
+    return this.realStrokeStyle;
+  }
+}
 interface MainCanvasPageLoadedData {
   width: number;
   height: number;
@@ -32,7 +63,11 @@ interface MainCanvas {
  * Each `Set` once set shouldn't change anymore as it saves us from having to lookup
  * again. You therefore need to clear each set if you want to remove all references.
  */
-const mainCanvasMap: WeakMap<
+const lightModeMainCanvasMap: WeakMap<
+  PDFDocumentProxy,
+  Map<number, Set<MainCanvas>>
+> = new WeakMap();
+const darkModeMainCanvasMap: WeakMap<
   PDFDocumentProxy,
   Map<number, Set<MainCanvas>>
 > = new WeakMap();
@@ -56,7 +91,8 @@ function renderCanvas(
   referenceManager: PdfCanvasReferenceManager,
   canvasObject: CanvasObject,
   pageNumber: number,
-  scale: number
+  scale: number,
+  darkMode: boolean
 ): [Promise<void>, Promise<void>] {
   const renderingReference = referenceManager.createRetainedRef();
   const pagePromise = getPage(pdf, pageNumber);
@@ -68,21 +104,27 @@ function renderCanvas(
     canvasObject.canvas.height = viewport.height;
     canvasObject.canvas.style.width = "100%";
     canvasObject.canvas.style.height = "100%";
-
-    await page.render({
-      canvasContext: canvasObject.context,
-      viewport,
-      canvasFactory: globalFactory,
-    }).promise;
+    await new Promise(resolve => window.requestAnimationFrame(resolve));
+    if (darkMode) {
+      const proxyContext = new DarkModeProxyContext(canvasObject.context);
+      proxyContext.fillStyle = "rgb(0,0,0)";
+      proxyContext.strokeStyle = "rgb(0,0,0)";
+      await page.render({
+        canvasContext: proxyContext,
+        viewport,
+        canvasFactory: globalFactory,
+      }).promise;
+    } else {
+      await page.render({
+        canvasContext: canvasObject.context,
+        viewport,
+        canvasFactory: globalFactory,
+      }).promise;
+    }
     renderingReference.release();
   })();
 
-  return [
-    (async () => {
-      await pagePromise;
-    })(),
-    renderingPromise,
-  ];
+  return [pagePromise.then(() => undefined), renderingPromise];
 }
 /**
  * Creates a new mainCanvas for `pageNumber` and renders the page to it.
@@ -93,9 +135,13 @@ function renderCanvas(
 function createMainCanvas(
   pdf: PDFDocumentProxy,
   pageNumber: number,
-  scale: number
+  scale: number,
+  darkMode: boolean
 ): MainCanvas {
-  const cache = getCache(mainCanvasMap, pdf);
+  const cache = getCache(
+    darkMode ? darkModeMainCanvasMap : lightModeMainCanvasMap,
+    pdf
+  );
   const canvasObject = globalFactory.create(undefined, undefined);
   const referenceManager = new PdfCanvasReferenceManager(0);
   const initialRef = referenceManager.createRetainedRef();
@@ -104,7 +150,8 @@ function createMainCanvas(
     referenceManager,
     canvasObject,
     pageNumber,
-    scale
+    scale,
+    darkMode
   );
   const mainCanvas: MainCanvas = {
     scale,
@@ -127,22 +174,26 @@ function createMainCanvas(
   if (existingSet) {
     existingSet.add(mainCanvas);
   } else {
-    const cache = getCache(mainCanvasMap, pdf);
+    const cache = getCache(
+      darkMode ? darkModeMainCanvasMap : lightModeMainCanvasMap,
+      pdf
+    );
     cache.set(pageNumber, newSet);
   }
   // Remove it if we no longer need it
   let timeout: number | undefined;
   initialRef.addListener(() => {
+    console.log(`Ref released: ${darkMode}`);
     mainCanvas.currentMainRef = undefined;
   });
   referenceManager.addListener((cnt: number) => {
     if (cnt <= 0) {
       // We keep the mainCanvas around a bit so that it can be reused.
-      // 2_000 turned out to be a decent value.
+      // 10_000 turned out to be a decent value.
       timeout = window.setTimeout(() => {
         globalFactory.destroy(canvasObject);
         mainCanvasSet.delete(mainCanvas);
-      }, 2000);
+      }, 10_000);
     } else {
       // If the reference is used again we abort its removal.
       if (timeout) window.clearTimeout(timeout);
@@ -177,9 +228,14 @@ export async function renderCanvasRegion(
   xStart: number,
   xEnd: number,
   yStart: number,
-  yEnd: number
+  yEnd: number,
+  darkMode: boolean
 ): Promise<[HTMLCanvasElement, boolean, PdfCanvasReference]> {
-  const cache = getCache(mainCanvasMap, pdf);
+  const cache = getCache(
+    darkMode ? darkModeMainCanvasMap : lightModeMainCanvasMap,
+    pdf
+  );
+
   const mainCanvasSet = cache.get(pageNumber);
   let mainCanvas: MainCanvas | undefined;
   let isMainUser = false;
@@ -202,9 +258,10 @@ export async function renderCanvasRegion(
       mainCanvas.currentMainRef = mainCanvas?.referenceManager.createRetainedRef();
     }
   }
+
   // It looks like we have to render from scratch
   if (mainCanvas === undefined) {
-    mainCanvas = createMainCanvas(pdf, pageNumber, scale);
+    mainCanvas = createMainCanvas(pdf, pageNumber, scale, darkMode);
     isMainUser = true;
   }
   // This isn't possible but it's hard to tell typescript that it is not
