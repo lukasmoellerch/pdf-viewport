@@ -25,7 +25,8 @@ export function usePdf(
   xEnd: number,
   yStart: number,
   yEnd: number,
-  targetWidth: number | undefined
+  targetWidth: number | undefined,
+  darkMode: boolean
 ): [HTMLCanvasElement | null, boolean] {
   const [canvasElement, setCanvasElement] = useState<HTMLCanvasElement | null>(
     null
@@ -57,7 +58,6 @@ export function usePdf(
       if (cancel) return;
 
       const viewport = page.getViewport({ scale: 1.0 });
-
       currentPromise = renderCanvasRegion(
         pdf,
         pageNumber,
@@ -65,7 +65,8 @@ export function usePdf(
         xStart,
         xEnd,
         yStart,
-        yEnd
+        yEnd,
+        darkMode
       );
       const [canvas, isMain, ref] = await currentPromise;
 
@@ -83,6 +84,6 @@ export function usePdf(
         currentPromise.then(([, , newRef]) => newRef.release());
       }
     };
-  }, [pdf, pageNumber, targetWidth, xStart, xEnd, yStart, yEnd]);
+  }, [pdf, pageNumber, targetWidth, xStart, xEnd, yStart, yEnd, darkMode]);
   return [canvasElement, isPrimaryCanvas];
 }
