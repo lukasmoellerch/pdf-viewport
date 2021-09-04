@@ -9,4 +9,5 @@ export {
   useViewport,
 } from "./components/viewport";
 export { getStream } from "./lib/render-text";
+export { ProxyContext } from "./lib/proxy-context";
 export { getPage } from "./lib/promise-memo";
