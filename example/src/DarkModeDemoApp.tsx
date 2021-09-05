@@ -17,11 +17,100 @@ import "./index.css";
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.7.570/pdf.worker.min.js";
 
+interface Props {
+  maxWidth: number;
+  documentProxy: PDFDocumentProxy;
+  pageNumber: number;
+  svg: boolean;
+}
+
+const Demo: React.FC<Props> = ({
+  maxWidth,
+  documentProxy,
+  pageNumber,
+  svg,
+}) => {
+  const [darkAmount, setDarkAmount] = useState(0.5);
+  return (
+    <div
+      style={{
+        margin: "auto",
+        maxWidth,
+      }}
+      className={tw`relative`}
+    >
+      <div
+        style={{
+          display: "flex",
+        }}
+        className={tw`rounded-md shadow-lg ring-1 ring-gray-400 relative z-10 overflow-hidden`}
+      >
+        <PdfViewport
+          pdf={documentProxy}
+          pageNumber={pageNumber}
+          approximateAspectRatio={portraitA4}
+          className={tw`w-full`}
+        />
+
+        <div
+          className={tw`absolute inset-0`}
+          style={{
+            opacity: darkAmount === 0 ? 0 : 1,
+            clipPath: `inset(0 ${(1 - darkAmount) * 100}% 0 0)`,
+          }}
+        >
+          <PdfViewport
+            pdf={documentProxy}
+            pageNumber={pageNumber}
+            approximateAspectRatio={portraitA4}
+            className={tw`absolute inset-0`}
+          >
+            {svg ? (
+              <PdfSvgLayer middleware={darkModeSvgMiddleware} />
+            ) : (
+              <PdfCanvasLayer middleware={darkModeCanvasMiddleware} />
+            )}
+          </PdfViewport>
+        </div>
+        <div
+          className={tw`absolute inset-0`}
+          style={{
+            opacity: darkAmount === 1 ? 0 : 1,
+            clipPath: `inset(0 0 0 ${darkAmount * 100}%)`,
+          }}
+        >
+          <PdfViewport
+            pdf={documentProxy}
+            pageNumber={pageNumber}
+            approximateAspectRatio={portraitA4}
+            className={tw`absolute inset-0`}
+          >
+            {svg ? <PdfSvgLayer /> : <PdfCanvasLayer />}
+          </PdfViewport>
+        </div>
+      </div>
+      <StyledSlider
+        min={0}
+        max={1}
+        step={0.001}
+        aria-label="Image Slider"
+        value={[darkAmount]}
+        onValueChange={e => setDarkAmount(e[0])}
+      >
+        <StyledTrack>
+          <StyledRange />
+        </StyledTrack>
+        <StyledThumb />
+      </StyledSlider>
+    </div>
+  );
+};
+
 const StyledSlider: React.FC<SliderPrimitive.SliderOwnProps> = props => {
   return (
     <SliderPrimitive.Root
       className={tw(
-        "absolute flex items-center select-none top-1/2 transform -translate-y-1/2",
+        "absolute flex items-center select-none top-1/2 transform -translate-y-1/2 z-20",
         css({
           touchAction: "none",
 
@@ -75,7 +164,7 @@ const StyledThumb: React.FC<SliderPrimitive.SliderThumbOwnProps> = props => {
             borderRadius: "11px",
             "&:hover": { backgroundColor: "rgb(220, 220, 220)" },
           }),
-          "ring-4 ring-gray-500 ring-opacity-40 hover:ring-opacity-60 focus:ring-opacity-80"
+          "ring-4 ring-gray-500 ring-opacity-40 hover:ring-opacity-60 focus:ring-opacity-80 cursor-col-resize"
         )}
       ></span>
     </SliderPrimitive.Thumb>
@@ -119,7 +208,6 @@ const App = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const [maxWidth, setMaxWidth] = useState(900);
   const [svg, setSvg] = useState(false);
-  const [darkAmount, setDarkAmount] = useState(0.5);
 
   return (
     <div>
@@ -181,69 +269,12 @@ const App = () => {
             backgroundColor: "hsl(0,0%,9%)",
           }}
         >
-          <div
-            style={{
-              margin: "auto",
-              maxWidth,
-              display: "flex",
-            }}
-            className={tw`rounded-md shadow-lg ring-1 ring-gray-400 relative z-10 overflow-hidden`}
-          >
-            <PdfViewport
-              pdf={documentProxy}
-              pageNumber={pageNumber}
-              approximateAspectRatio={portraitA4}
-              className={tw`w-full`}
-            />
-
-            <div
-              className={tw`absolute inset-0`}
-              style={{
-                clipPath: `inset(0 ${(1 - darkAmount) * 100}% 0 0)`,
-              }}
-            >
-              <PdfViewport
-                pdf={documentProxy}
-                pageNumber={pageNumber}
-                approximateAspectRatio={portraitA4}
-                className={tw`absolute inset-0`}
-              >
-                {svg ? (
-                  <PdfSvgLayer middleware={darkModeSvgMiddleware} />
-                ) : (
-                  <PdfCanvasLayer middleware={darkModeCanvasMiddleware} />
-                )}
-              </PdfViewport>
-            </div>
-            <div
-              className={tw`absolute inset-0`}
-              style={{
-                clipPath: `inset(0 0 0 ${darkAmount * 100}%)`,
-              }}
-            >
-              <PdfViewport
-                pdf={documentProxy}
-                pageNumber={pageNumber}
-                approximateAspectRatio={portraitA4}
-                className={tw`absolute inset-0`}
-              >
-                {svg ? <PdfSvgLayer /> : <PdfCanvasLayer />}
-              </PdfViewport>
-            </div>
-            <StyledSlider
-              min={0}
-              max={1}
-              step={0.01}
-              aria-label="Image Slider"
-              value={[darkAmount]}
-              onValueChange={e => setDarkAmount(e[0])}
-            >
-              <StyledTrack>
-                <StyledRange />
-              </StyledTrack>
-              <StyledThumb />
-            </StyledSlider>
-          </div>
+          <Demo
+            documentProxy={documentProxy}
+            pageNumber={pageNumber}
+            maxWidth={maxWidth}
+            svg={svg}
+          />
           <div className={tw`my-4 max-w-4xl mx-auto px-5 text-white`}>
             <p>Page:</p>
             <div
