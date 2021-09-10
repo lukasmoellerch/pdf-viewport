@@ -63,7 +63,7 @@ const App = () => {
   React.useEffect(() => {
     getDocument(examplePdf).promise.then(setPdf);
   }, []);
-  const pageStyle = tw`shadow-lg rounded-md overflow-hidden border-1 border-gray-400`;
+  const pageStyle = tw`shadow-lg rounded-md overflow-hidden border-1 border-gray-400 z-10`;
   const canvasStyle = tw`rounded-md overflow-hidden`;
   return (
     <div className={tw`container mx-auto px-6`}>
@@ -139,7 +139,7 @@ const App = () => {
       <h3 className={tw`text-lg font-bold mt-6 mb-4`}>
         Canvas &amp; SVG Rendering
       </h3>
-      <div className={tw`flex flex-wrap w-100`}>
+      <div className={tw`flex flex-wrap w-full`}>
         <div
           className={tw`flex flex-grow bg-purple-100 justify-between p-3 items-start rounded-lg border-2 border-purple-200`}
         >
@@ -223,8 +223,8 @@ const App = () => {
             xEnd={0.4}
             className={pageStyle + " " + tw`w-5/6 mx-auto xl:ml-0`}
           >
-            <PdfTextLayer />
             <PdfSvgLayer />
+            <PdfTextLayer />
           </PdfViewport>
         </div>
         <pre>{exampleD}</pre>

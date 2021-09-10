@@ -2,7 +2,16 @@ import * as React from "react";
 import { useCallback } from "react";
 import useDpr from "../hooks/useDpr";
 import { usePdf } from "../hooks/usePdf";
+import { CanvasMiddleware } from "../lib/utils";
 import { useViewport } from "./viewport";
+
+interface Props {
+  className?: string;
+  /**
+   * The middleware to use for rendering
+   */
+  middleware?: CanvasMiddleware;
+}
 
 /**
  * This component renders the pdf viewport on a canvas element, taking dpr into account
@@ -25,7 +34,7 @@ import { useViewport } from "./viewport";
  * ```
  *
  */
-const PdfCanvasLayer: React.FC<{ className?: string }> = ({ className }) => {
+const PdfCanvasLayer: React.FC<Props> = ({ className, middleware }) => {
   // Extract the data from `PdfViewport`.
   const {
     pdf,
@@ -53,7 +62,8 @@ const PdfCanvasLayer: React.FC<{ className?: string }> = ({ className }) => {
     // or the component is rendered on the server) we pass undefined to defer rendering until the
     // useEffect call in useDpr sets the dpr. Rendering this component is pretty cheap so that
     // shouldn't be an issue.
-    dpr !== undefined ? (targetWidth / (xEnd - xStart)) * dpr : undefined
+    dpr !== undefined ? (targetWidth / (xEnd - xStart)) * dpr : undefined,
+    middleware
   );
 
   /**

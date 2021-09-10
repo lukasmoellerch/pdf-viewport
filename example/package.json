@@ -1,12 +1,14 @@
 {
   "name": "example",
   "version": "0.0.0",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview"
   },
   "dependencies": {
+    "@radix-ui/react-slider": "^0.0.17",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "twind": "^0.14.6"

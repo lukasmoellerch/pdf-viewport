@@ -1,7 +1,15 @@
 import * as React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { renderSVG } from "../lib/render-svg";
+import { SvgMiddleware } from "../lib/utils";
 import { useViewport } from "./viewport";
+
+interface Props {
+  /**
+   * The middleware to use for rendering.
+   */
+  middleware?: SvgMiddleware;
+}
 
 /**
  * This component renders the pdf viewport using an svg element.
@@ -20,7 +28,7 @@ import { useViewport } from "./viewport";
  * ```
  *
  */
-const PdfSvgLayer = () => {
+const PdfSvgLayer: React.FC<Props> = ({ middleware }) => {
   // Extract the data from `PdfViewport`.
   const {
     pdf,
@@ -29,12 +37,8 @@ const PdfSvgLayer = () => {
     xStart,
     xEnd,
     yStart,
-    yEnd,
+    pageAspectRatio,
   } = useViewport();
-
-  // We need to know the width of the svg to determine how much we have to scale it. For SVG elements
-  // we can easily use the svg element itself to determine the page size without having to pass it around
-  const [width, setWidth] = useState(targetWidth);
 
   // The parent we attach the svg element to
   const ref = useRef<HTMLDivElement>() as React.MutableRefObject<
@@ -42,15 +46,23 @@ const PdfSvgLayer = () => {
   >;
 
   useEffect(() => {
-    renderSVG(pdf, pageNumber).then(s => {
+    let cancel = false;
+    (async () => {
+      const s = await renderSVG(pdf, pageNumber, middleware);
+      if (cancel) return;
+
       const p = ref.current;
       if (p === null) return;
       while (p.firstChild) p.removeChild(p.firstChild);
       p.appendChild(s);
 
-      setWidth(parseFloat(s.getAttribute("width") ?? ""));
-    });
-  }, [pdf, pageNumber, ref]);
+      s.setAttribute("width", "100%");
+      s.setAttribute("height", "100%");
+    })();
+    return () => {
+      cancel = true;
+    };
+  }, [pdf, pageNumber, ref, middleware]);
 
   return (
     <div
@@ -83,9 +95,10 @@ const PdfSvgLayer = () => {
         // we shift it yStart units up
         // Finally we scale it so that the relative cropped display space matches
         // the given `targetWidth`
-        transform: `translateX(-${(xStart / (xEnd - xStart)) *
-          100}%) translateY(-${(yStart / (yEnd - yStart)) *
-          100}%) scale(${targetWidth / (xEnd - xStart) / width})`,
+        transform: `translateX(-${xStart * 100}%) translateY(-${yStart *
+          100}%)`,
+        width: `${targetWidth / (xEnd - xStart)}px`,
+        height: `${targetWidth / pageAspectRatio / (xEnd - xStart)}px`,
 
         // We transform with a coordinate system that has its origin in the top right coordinates
         // this makes coordinate system transformations easier.

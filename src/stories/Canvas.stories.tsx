@@ -3,7 +3,7 @@ import * as pdfjsLib from "pdfjs-dist/es5/build/pdf";
 import { getDocument } from "pdfjs-dist/es5/build/pdf";
 import { PDFDocumentProxy } from "pdfjs-dist/types/display/api";
 import React, { useEffect, useState } from "react";
-import { PdfCanvasLayer, PdfViewport } from "..";
+import { PdfCanvasLayer, PdfViewport, darkModeCanvasMiddleware } from "..";
 import examplePdf from "./assets/pdfjs_example.pdf";
 
 export default {
@@ -22,7 +22,10 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
 const portraitA4 = 0.772727273;
 
-const Template: Story<{ maxWidth: number }> = ({ maxWidth }) => {
+const Template: Story<{ maxWidth: number; darkMode?: boolean }> = ({
+  maxWidth,
+  darkMode,
+}) => {
   const [pdf, setPdf] = useState<PDFDocumentProxy>();
   useEffect(() => {
     getDocument(examplePdf).promise.then(setPdf);
@@ -34,10 +37,15 @@ const Template: Story<{ maxWidth: number }> = ({ maxWidth }) => {
       pageNumber={3}
       style={{ maxWidth, margin: "auto", border: "1px solid black" }}
     >
-      <PdfCanvasLayer />
+      <PdfCanvasLayer
+        middleware={darkMode ? darkModeCanvasMiddleware : undefined}
+      />
     </PdfViewport>
   );
 };
 
 export const Canvas = Template.bind({});
 Canvas.args = {};
+
+export const CanvasDarkMode = Template.bind({});
+CanvasDarkMode.args = { darkMode: true };

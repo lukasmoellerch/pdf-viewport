@@ -15,4 +15,12 @@ export default defineConfig({
       "react-dom": require.resolve("react-dom"),
     },
   },
+  build: {
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, "index.html"),
+        "dark-mode": path.resolve(__dirname, "dark-mode/index.html"),
+      },
+    },
+  },
 });
