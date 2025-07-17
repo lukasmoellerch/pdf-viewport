@@ -1,0 +1,1 @@
+// SVG rendering placeholder
